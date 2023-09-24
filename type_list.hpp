@@ -30,6 +30,17 @@ template <auto N, typename... Ts>
 using at_t = typename at<N, type_list<Ts...>>::type;
 
 
+// Convert type_list into a std::tuple
+template <typename List>
+struct to_tuple;
+
+template <typename... Ts>
+struct to_tuple<type_list<Ts...>>
+{
+    using type = std::tuple<Ts...>;
+};
+
+
 // Check if any element matches a predicate. 
 // Returns a std::bool_constant type.
 template <typename List, auto Pred>
