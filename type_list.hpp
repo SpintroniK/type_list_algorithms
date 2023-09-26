@@ -54,3 +54,15 @@ struct any_of<type_list<Ts...>, Pred> : std::type_identity<decltype
         return std::bool_constant<(Pred(at_t<Is, Ts...>{}) || ...)>{};
     }(std::index_sequence_for<Ts...>{})
 )>{};
+
+
+// Concatenate two type lists
+template <typename List1, typename List2>
+struct concat;
+
+template <typename... Ts, typename... Us>
+struct concat<type_list<Ts...>, type_list<Us...>>
+{
+    using type = type_list<Ts..., Us...>;
+};
+
