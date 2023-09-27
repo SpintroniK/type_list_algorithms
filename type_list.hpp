@@ -66,3 +66,15 @@ struct concat<type_list<Ts...>, type_list<Us...>>
     using type = type_list<Ts..., Us...>;
 };
 
+
+// zip
+template <typename List1, typename List2>
+struct zip;
+
+template <typename... Ts, typename... Us>
+struct zip<type_list<Ts...>, type_list<Us...>>
+{
+    using type = type_list<type_list<Ts, Us>...>;
+};
+
+
