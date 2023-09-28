@@ -78,3 +78,18 @@ struct zip<type_list<Ts...>, type_list<Us...>>
 };
 
 
+// Transform
+template <typename List, auto F>
+struct transform;
+
+template <typename... Ts, auto F>
+struct transform<type_list<Ts...>, F> : std::type_identity<decltype
+(
+    []<auto... Is>(std::index_sequence<Is...>)
+    {
+        return type_list<decltype(F(at_t<Is, Ts...>{}))...>{};
+    }(std::index_sequence_for<Ts...>{})
+)>{};
+
+
+
