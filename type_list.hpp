@@ -78,7 +78,7 @@ struct zip<type_list<Ts...>, type_list<Us...>>
 };
 
 
-// Transform
+// transform
 template <typename List, auto F>
 struct transform;
 
@@ -92,4 +92,16 @@ struct transform<type_list<Ts...>, F> : std::type_identity<decltype
 )>{};
 
 
+// count_if
+template <typename List, auto Pred>
+struct count_if;
+
+template <typename... Ts, auto Pred>
+struct count_if<type_list<Ts...>, Pred> : std::type_identity<decltype
+(
+    []<auto... Is>(std::index_sequence<Is...>)
+    {
+        return std::integral_constant<std::size_t, (std::size_t(0) + ... + (Pred(at_t<Is, Ts...>{}) ? 1 : 0))>{};
+    }(std::index_sequence_for<Ts...>{})
+)>{};
 

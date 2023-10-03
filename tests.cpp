@@ -28,4 +28,7 @@ int main()
         [](double) { return char{}; },
     };
     static_assert(any_of<transform<concat_list, f>::type, is_int>::type::value == true);
+
+    // count_if
+    static_assert(count_if<concat_list, is_int>::type::value == 2);
 }
