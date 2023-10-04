@@ -105,3 +105,11 @@ struct count_if<type_list<Ts...>, Pred> : std::type_identity<decltype
     }(std::index_sequence_for<Ts...>{})
 )>{};
 
+// count
+template <typename List, typename T>
+struct count;
+
+template <typename... Ts, typename T>
+struct count<type_list<Ts...>, T> : count_if<type_list<Ts...>, []<typename U>(U) { return std::is_same_v<T, U>; }>{};
+
+

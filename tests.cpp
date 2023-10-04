@@ -31,4 +31,8 @@ int main()
 
     // count_if
     static_assert(count_if<concat_list, is_int>::type::value == 2);
+
+    // count
+    static_assert(count<concat_list, int>::type::value == 2);
+
 }
