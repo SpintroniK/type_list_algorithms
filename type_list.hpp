@@ -9,19 +9,19 @@ struct type_list{};
 
 
 // Get list size (i.e.: its length)
-template <typename List>
+template <typename List, typename... Ts>
 struct size;
 
-template <typename... Ts>
-struct size<type_list<Ts...>> : std::integral_constant<std::size_t, sizeof...(Ts)>{};
+template <template <typename...> typename List, typename... Ts>
+struct size<List<Ts...>> : std::integral_constant<std::size_t, sizeof...(Ts)>{};
 
 
 // Get a type using its index in the list
 template <auto N, typename List>
 struct at;
 
-template <auto N, typename... Ts>
-struct at<N, type_list<Ts...>>
+template <auto N, template <typename...> typename List, typename... Ts>
+struct at<N, List<Ts...>>
 {
     using type = std::tuple_element_t<N, std::tuple<Ts...>>;
 };
@@ -31,11 +31,11 @@ using at_t = typename at<N, type_list<Ts...>>::type;
 
 
 // Convert type_list into a std::tuple
-template <typename List>
+template <typename List, typename... Ts>
 struct to_tuple;
 
-template <typename... Ts>
-struct to_tuple<type_list<Ts...>>
+template <template <typename...> typename List, typename... Ts>
+struct to_tuple<List<Ts...>>
 {
     using type = std::tuple<Ts...>;
 };
@@ -46,8 +46,8 @@ struct to_tuple<type_list<Ts...>>
 template <typename List, auto Pred>
 struct any_of;
 
-template <typename... Ts, auto Pred>
-struct any_of<type_list<Ts...>, Pred> : std::type_identity<decltype
+template <template <typename...> typename List, typename... Ts, auto Pred>
+struct any_of<List<Ts...>, Pred> : std::type_identity<decltype
 (
     []<auto... Is>(std::index_sequence<Is...>)
     {
@@ -71,10 +71,10 @@ struct concat<type_list<Ts...>, type_list<Us...>>
 template <typename List1, typename List2>
 struct zip;
 
-template <typename... Ts, typename... Us>
-struct zip<type_list<Ts...>, type_list<Us...>>
+template <template <typename...> typename List, typename... Ts, typename... Us>
+struct zip<List<Ts...>, List<Us...>>
 {
-    using type = type_list<type_list<Ts, Us>...>;
+    using type = List<List<Ts, Us>...>;
 };
 
 
@@ -82,8 +82,8 @@ struct zip<type_list<Ts...>, type_list<Us...>>
 template <typename List, auto F>
 struct transform;
 
-template <typename... Ts, auto F>
-struct transform<type_list<Ts...>, F> : std::type_identity<decltype
+template <template <typename...> typename List, typename... Ts, auto F>
+struct transform<List<Ts...>, F> : std::type_identity<decltype
 (
     []<auto... Is>(std::index_sequence<Is...>)
     {
@@ -96,12 +96,12 @@ struct transform<type_list<Ts...>, F> : std::type_identity<decltype
 template <typename List, auto Pred>
 struct count_if;
 
-template <typename... Ts, auto Pred>
-struct count_if<type_list<Ts...>, Pred> : std::type_identity<decltype
+template <template <typename...> typename List, typename... Ts, auto Pred>
+struct count_if<List<Ts...>, Pred> : std::type_identity<decltype
 (
     []<auto... Is>(std::index_sequence<Is...>)
     {
-        return std::integral_constant<std::size_t, (std::size_t(0) + ... + (Pred(at_t<Is, Ts...>{}) ? 1 : 0))>{};
+        return std::integral_constant<std::size_t, (std::size_t{0} + ... + (Pred(at_t<Is, Ts...>{}) ? 1 : 0))>{};
     }(std::index_sequence_for<Ts...>{})
 )>{};
 
@@ -109,7 +109,7 @@ struct count_if<type_list<Ts...>, Pred> : std::type_identity<decltype
 template <typename List, typename T>
 struct count;
 
-template <typename... Ts, typename T>
-struct count<type_list<Ts...>, T> : count_if<type_list<Ts...>, []<typename U>(U) { return std::is_same_v<T, U>; }>{};
+template <template <typename...> typename List, typename... Ts, typename T>
+struct count<List<Ts...>, T> : count_if<List<Ts...>, []<typename U>(U) { return std::is_same_v<T, U>; }>{};
 
 
