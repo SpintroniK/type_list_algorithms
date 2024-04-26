@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tuple>
 #include <type_traits>
+#include <utility>
 
 // Type list definition
 template <typename... Ts>
@@ -17,29 +17,20 @@ struct size<List<Ts...>> : std::integral_constant<std::size_t, sizeof...(Ts)>{};
 
 
 // Get a type using its index in the list
-template <auto N, typename List>
-struct at;
-
-template <auto N, template <typename...> typename List, typename... Ts>
-struct at<N, List<Ts...>>
+template <std::size_t N, typename T, typename...Ts>
+struct at
 {
-    using type = std::tuple_element_t<N, std::tuple<Ts...>>;
+    using type = typename at<N - 1, Ts...>::type;
+};
+
+template <typename T, typename...Ts>
+struct at<0, T, Ts...>
+{
+    using type = T;
 };
 
 template <auto N, typename... Ts>
-using at_t = typename at<N, type_list<Ts...>>::type;
-
-
-// Convert type_list into a std::tuple
-template <typename List, typename... Ts>
-struct to_tuple;
-
-template <template <typename...> typename List, typename... Ts>
-struct to_tuple<List<Ts...>>
-{
-    using type = std::tuple<Ts...>;
-};
-
+using at_t = typename at<N, Ts...>::type;
 
 // Check if any element matches a predicate. 
 // Returns a std::bool_constant type.
