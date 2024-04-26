@@ -14,7 +14,8 @@ int main()
     static_assert(size<list1>::value == 3);
 
     // any_of
-    constexpr auto is_int = []<typename T>(T) { return std::is_same_v<T, int>; };
+    constexpr auto is_int  = []<typename T>(T) { return std::is_same_v<T, int>; };
+    constexpr auto is_char = []<typename T>(T) { return std::is_same_v<T, char>; };
     static_assert(any_of<list1, is_int>::type::value == true);
 
     // concat
@@ -34,5 +35,10 @@ int main()
 
     // count
     static_assert(count<concat_list, int>::type::value == 2);
+
+    // find_if
+    struct not_found{};
+    static_assert(std::is_same_v<find_if<is_char, not_found, list1>::type, not_found>);
+    static_assert(std::is_same_v<find_if<is_int, not_found, list2>::type, int>);
 
 }

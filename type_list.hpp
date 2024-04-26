@@ -103,4 +103,30 @@ struct count;
 template <template <typename...> typename List, typename... Ts, typename T>
 struct count<List<Ts...>, T> : count_if<List<Ts...>, []<typename U>(U) { return std::is_same_v<T, U>; }>{};
 
+// find_if
+template <auto Predicate, typename NotFound, typename... Ts>
+struct find_if_impl;
 
+template <auto Predicate, typename NotFound>
+struct find_if_impl<Predicate, NotFound>
+{
+    using type = NotFound;
+};
+
+template <auto Predicate, typename NotFound, typename T, typename... Ts>
+struct find_if_impl<Predicate, NotFound, T, Ts...>
+{
+    using type =  std::conditional_t<Predicate(T{}), 
+                                    T, 
+                                    typename find_if_impl<Predicate, NotFound, Ts...>::type>;
+};
+
+
+template <auto Predicate, typename NotFound, typename List, typename... Ts>
+struct find_if;
+
+template <template <typename...> typename List, auto Predicate, typename NotFound, typename... Ts>
+struct find_if<Predicate, NotFound, List<Ts...>>
+{
+    using type = find_if_impl<Predicate, NotFound, Ts...>::type;
+};
