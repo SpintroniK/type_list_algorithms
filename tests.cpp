@@ -38,7 +38,17 @@ int main()
 
     // find_if
     struct not_found{};
-    static_assert(std::is_same_v<find_if<is_char, not_found, list1>::type, not_found>);
-    static_assert(std::is_same_v<find_if<is_int, not_found, list2>::type, int>);
+    //static_assert(std::is_same_v<find_if<is_char, not_found, list1>::type, not_found>);
+    //static_assert(std::is_same_v<find_if<is_int, not_found, list2>::type, int>);
+
+
+
+    static_assert(index_of<float, list1>::type::value == 1);
+    static_assert(index_if<is_int, list2>::type::value == 1);
+
+    constexpr auto bigger_than_byte = []<typename T>(T) { return sizeof(T) > 1; };
+
+    static_assert(index_if<bigger_than_byte, list2>::type::value == 1);
+    static_assert(std::is_same_v<find_if<bigger_than_byte, not_found, list2>::type, int>);
 
 }

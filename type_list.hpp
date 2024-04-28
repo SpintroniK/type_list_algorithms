@@ -96,6 +96,7 @@ struct count_if<List<Ts...>, Pred> : std::type_identity<decltype
     }(std::index_sequence_for<Ts...>{})
 )>{};
 
+
 // count
 template <typename List, typename T>
 struct count;
@@ -103,30 +104,46 @@ struct count;
 template <template <typename...> typename List, typename... Ts, typename T>
 struct count<List<Ts...>, T> : count_if<List<Ts...>, []<typename U>(U) { return std::is_same_v<T, U>; }>{};
 
-// find_if
-template <auto Predicate, typename NotFound, typename... Ts>
-struct find_if_impl;
 
-template <auto Predicate, typename NotFound>
-struct find_if_impl<Predicate, NotFound>
-{
-    using type = NotFound;
-};
+struct not_found{};
 
-template <auto Predicate, typename NotFound, typename T, typename... Ts>
-struct find_if_impl<Predicate, NotFound, T, Ts...>
-{
-    using type =  std::conditional_t<Predicate(T{}), 
-                                    T, 
-                                    typename find_if_impl<Predicate, NotFound, Ts...>::type>;
-};
+template <auto Pred, typename List>
+struct index_if;
+
+template <template <typename...> typename List, auto Pred, typename... Ts>
+struct index_if<Pred, List<Ts...>> : std::type_identity<decltype
+(
+    []<auto... Is>(std::index_sequence<Is...>)
+    {
+        return std::integral_constant<int, (0 + ... + (Pred(at_t<Is, not_found, Ts...>{}) ? int{Is} : 0)) - 1>{};
+    }(std::index_sequence_for<not_found, Ts...>{})
+)>{};
 
 
-template <auto Predicate, typename NotFound, typename List, typename... Ts>
+template <typename T, typename List>
+struct index_of;
+
+template <template <typename...> typename List, typename T, typename... Ts>
+struct index_of<T, List<Ts...>> : index_if<[]<typename U>(U) { return std::is_same_v<T, U>; }, List<Ts...>>{}; 
+
+
+//find_if
+template <auto Pred, typename NotFound, typename List>
 struct find_if;
 
-template <template <typename...> typename List, auto Predicate, typename NotFound, typename... Ts>
-struct find_if<Predicate, NotFound, List<Ts...>>
-{
-    using type = find_if_impl<Predicate, NotFound, Ts...>::type;
-};
+template <auto Pred, typename NotFound, template <typename...> typename List, typename... Ts>
+struct find_if<Pred, NotFound, List<Ts...>> : std::type_identity<decltype
+(
+    []
+    {
+        constexpr auto index = index_if<Pred, List<Ts...>>::type::value;
+        if constexpr (index == -1)
+        {
+            return NotFound{};
+        }
+        else
+        {
+            return at_t<index, Ts...>{};
+        }
+    }()
+)>{};
